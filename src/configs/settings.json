@@ -274,10 +274,10 @@
             "name": "primary",
             "label": "🎒 Primary School",
             "difficulty": "easy",
-            "numberOfQuestions": 5,
-            "timerPerQuestion": 12,
+            "numberOfQuestions": 20,
+            "timerPerQuestion": 60,
             "questionType": ["multiple-choice"],
-            "categories": ["animals","actions", "persons", "country"],
+            "categories": ["animals","actions", "persons", "places", "other"],
             "description": "Basic spelling bee for young learners",
             "timerEnabled": true,
             "questionsEnabled": true,
@@ -288,16 +288,16 @@
             "maxIncorrectAnswers": 3,
             "incorrectAnswersEnabled": false,
             "overallTimerEnabled": false,
-            "overallTimerDuration": 180
+            "overallTimerDuration": 18000
         },
         {
             "name": "junior-high",
             "label": "📚 Junior High School",
             "difficulty": "easy",
-            "numberOfQuestions": 10,
-            "timerPerQuestion": 10,
+            "numberOfQuestions": 30,
+            "timerPerQuestion": 60,
             "questionType": ["input", "multiple-choice"],
-            "categories": ["actions", "country", "person", "science", "technology"],
+            "categories": ["actions", "places", "person", "science", "technology"],
             "description": "Intermediate spelling bee",
             "timerEnabled": true,
             "questionsEnabled": true,
@@ -308,16 +308,16 @@
             "maxIncorrectAnswers": 5,
             "incorrectAnswersEnabled": false,
             "overallTimerEnabled": false,
-            "overallTimerDuration": 600
+            "overallTimerDuration": 30000
         },
         {
             "name": "senior-high",
             "label": "🎓 Senior High School",
             "difficulty": "hard",
-            "numberOfQuestions": 15,
-            "timerPerQuestion": 8,
+            "numberOfQuestions": 40,
+            "timerPerQuestion": 30,
             "questionType": ["input", "multiple-choice"],
-            "categories": ["actions", "country", "person", "science", "technology"],
+            "categories": ["actions", "places", "person", "science", "technology"],
             "description": "Advanced spelling bee challenges",
             "timerEnabled": true,
             "questionsEnabled": true,
@@ -327,8 +327,8 @@
             "minIncorrectAnswers": 0,
             "maxIncorrectAnswers": 8,
             "incorrectAnswersEnabled": false,
-            "overallTimerEnabled": true,
-            "overallTimerDuration": 900
+            "overallTimerEnabled": false,
+            "overallTimerDuration": 60000
         }
     ]
 }

@@ -5,10 +5,8 @@ import { APP } from '../utils/supabaseTables';
 
 export type Difficulty = 'easy' | 'hard';
 export type QuestionType = 'input' | 'multiple-choice';
-export type Category = 'countries' | 'animals' | 'persons' | 'science' | 'actions' | 'all';
+export type Category = 'places' | 'animals' | 'persons' | 'science' | 'technology' | 'actions' | 'other' | 'all' ;
 export type Categories = Category[];
-
-``
 export interface Question {
   id: string | number;
   question: string;
@@ -19,7 +17,12 @@ export interface Question {
   timeSpent?: number;
   difficulty: Difficulty,
   questionType: QuestionType,
-  categories: Categories
+  categories: Categories,
+  definition?: string;
+  category?: string;
+  synonyms?: string[];
+  antonyms?: string[];
+  numLetters?: number;
 }
 
 export interface QuizSettings {
@@ -78,8 +81,8 @@ export interface QuizState {
 const defaultSettings: QuizSettings = {
   username: '',
   difficulty: 'easy',
-  numberOfQuestions: 5,
-  timerPerQuestion: 10,
+  numberOfQuestions: 10,
+  timerPerQuestion: 20,
   questionType: 'input',
   categories: ['all'],
   timerEnabled: true,
@@ -180,8 +183,7 @@ export const useQuizStore = create<QuizState>((set, get) => ({
     });
   },
   submitAnswer: (answer: string) => {
-    set((state) => {
-     
+    set(() => {
       return {};
     });
   },
@@ -230,9 +232,7 @@ export const useQuizStore = create<QuizState>((set, get) => ({
   loadUserPreferences: () => {
     const preferences = userPreferencesStorage.load();
     if (preferences) {
-      set((state) => ({
-        settings: { ...state.settings, ...preferences.settings },
-      }));
+      set(() => ({}));
     }
   },
   saveUserPreferences: () => {

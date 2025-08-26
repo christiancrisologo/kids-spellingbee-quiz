@@ -9,14 +9,13 @@ import { EnhancedConfettiEffect } from '../../components/ui/EnhancedConfettiEffe
 import { useSystemSettings } from '../../contexts/system-settings-context';
 import { animationClasses } from '../../utils/enhanced-animations';
 import { checkAchievements } from '../../utils/achievements';
-import { generateQuestions } from '../../utils/math/question-generator';
 import { isChallengeCompleted, getChallengeCompletionMessage } from '../../utils/challengeModes';
 
 export default function ResultsPage() {
     const router = useRouter();
     const isMobile = useIsMobile();
     const { settings: systemSettings } = useSystemSettings();
-    const { settings, questions, resetQuiz, bestStreak, retryQuiz, saveGameResult, quizStartTime, isQuizCompleted } = useQuizStore();
+    const { settings, questions, resetQuiz, bestStreak, saveGameResult, quizStartTime, isQuizCompleted } = useQuizStore();
     const [showConfetti, setShowConfetti] = useState(false);
     const [showBonusConfetti, setShowBonusConfetti] = useState(false);
 
@@ -77,14 +76,14 @@ export default function ResultsPage() {
     const getGradeMessage = (percentage: number) => {
         const funnyQuotes = [
             "You're like a calculator, but way cooler! 🧮✨",
-            Spelling Bee wizard in training! Your powers are growing! 🧙‍♂️📚",
+            "Spelling Bee wizard in training! Your powers are growing! 🧙‍♂️📚",
             "Houston, we have a math genius! 🚀🌟",
             "You're making numbers dance! 💃🔢",
-            Spelling Bee superhero alert! 🦸‍♂️🔥",
+            "Spelling Bee superhero alert! 🦸‍♂️🔥",
             "You're sharper than a pencil! ✏️⚡",
             "Number ninja in action! 🥷🔢",
             "You're solving problems faster than a cheetah! 🐆💨",
-            Spelling Bee magician extraordinaire! 🎩✨",
+            "Spelling Bee magician extraordinaire! 🎩✨",
             "You're cooking up some serious math skills! 👨‍🍳🔥"
         ];
 
@@ -100,17 +99,7 @@ export default function ResultsPage() {
     const gradeInfo = getGradeMessage(percentage);
 
     const handleRetryQuiz = () => {
-        // Generate new questions with the same settings and go directly to quiz
-        const newQuestions = generateQuestions(
-            settings.numberOfQuestions,
-            settings.difficulty,
-            settings.mathOperations,
-            settings.questionType,
-            settings.numberTypes // Add number types parameter
-        );
-        retryQuiz(newQuestions);
-        // Reset current streak for the new quiz
-        // Note: we keep bestStreak to maintain the user's record
+        resetQuiz();
         router.push('/quiz');
     };
 
@@ -275,26 +264,14 @@ export default function ResultsPage() {
                                         <div className="space-y-2">
                                             <div className="flex items-center justify-between">
                                                 <span className="font-medium text-gray-700 dark:text-gray-300 text-sm">
-                                                    Q{index + 1}: {
-                                                        question.variable && question.equation
-                                                            ? `${question.equation} (${question.variable} = ${question.fractionAnswer || question.answer})`
-                                                            : `${question.question} = ${question.fractionAnswer || question.answer}`
-                                                    }
+                                                    Q{index + 1}: {question.question}
                                                 </span>
                                                 <span className="text-xl">
                                                     {question.isCorrect ? '✅' : '❌'}
                                                 </span>
                                             </div>
                                             <div className="text-xs text-gray-600 dark:text-gray-400">
-                                                Your answer: {
-                                                    question.userFractionAnswer !== undefined
-                                                        ? question.userFractionAnswer || 'No answer'
-                                                        : question.userAnswer !== undefined
-                                                            ? question.userAnswer === -1
-                                                                ? 'No answer'
-                                                                : question.userAnswer
-                                                            : 'No answer'
-                                                }
+                                                Your answer: {question.userAnswer ?? 'No answer'}
                                             </div>
                                             {question.timeSpent !== undefined && (
                                                 <div className="text-xs text-gray-500 dark:text-gray-500">
@@ -308,24 +285,12 @@ export default function ResultsPage() {
                                             <div className="flex items-center justify-between">
                                                 <div className="flex-1">
                                                     <span className="font-medium text-gray-700 dark:text-gray-300">
-                                                        Q{index + 1}: {
-                                                            question.variable && question.equation
-                                                                ? `${question.equation} (${question.variable} = ${question.fractionAnswer || question.answer})`
-                                                                : `${question.question} = ${question.fractionAnswer || question.answer}`
-                                                        }
+                                                        Q{index + 1}: {question.question}
                                                     </span>
                                                 </div>
                                                 <div className="flex items-center space-x-3">
                                                     <span className="text-sm text-gray-600 dark:text-gray-400">
-                                                        Your answer: {
-                                                            question.userFractionAnswer !== undefined
-                                                                ? question.userFractionAnswer || 'No answer'
-                                                                : question.userAnswer !== undefined
-                                                                    ? question.userAnswer === -1
-                                                                        ? 'No answer'
-                                                                        : question.userAnswer
-                                                                    : 'No answer'
-                                                        }
+                                                        Your answer: {question.userAnswer ?? 'No answer'}
                                                     </span>
                                                     <span className="text-2xl">
                                                         {question.isCorrect ? '✅' : '❌'}
@@ -374,12 +339,6 @@ export default function ResultsPage() {
                         <div className={`text-gray-600 dark:text-gray-400 ${isMobile ? 'text-sm' : 'text-base'}`}>
                             <div className="mb-2">
                                 <span className="font-medium">Difficulty:</span> {settings.difficulty.charAt(0).toUpperCase() + settings.difficulty.slice(1)}
-                            </div>
-                            <div className="mb-2">
-                                <span className="font-medium">Operations:</span> {settings.mathOperations.map(op => op.charAt(0).toUpperCase() + op.slice(1)).join(', ')}
-                            </div>
-                            <div className="mb-2">
-                                <span className="font-medium">Number Types:</span> {settings.numberTypes?.map(type => type.charAt(0).toUpperCase() + type.slice(1)).join(', ') || 'Integers'}
                             </div>
                             <div className="mb-2">
                                 <span className="font-medium">Question Type:</span> {settings.questionType.charAt(0).toUpperCase() + settings.questionType.slice(1)}

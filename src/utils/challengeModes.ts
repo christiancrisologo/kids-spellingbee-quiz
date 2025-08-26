@@ -1,4 +1,4 @@
-import gamesConfig from '../configs/games.json';
+import gamesConfig from '../configs/settings.json';
 import type { QuizSettings } from '../store/quiz-store';
 
 export interface ChallengeMode {

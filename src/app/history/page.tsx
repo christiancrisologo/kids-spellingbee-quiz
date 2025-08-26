@@ -271,12 +271,16 @@ export default function HistoryPage() {
                                             <td className="px-4 py-4 text-sm text-gray-900 dark:text-white">
                                                 <div className="space-y-1">
                                                     <div>📝 {game.settings.questionType?.charAt(0).toUpperCase() + game.settings.questionType?.slice(1) || 'Multiple Choice'}</div>
-                                                    <div>🔢 {game.settings.numberTypes?.map((type: string) =>
-                                                        type.charAt(0).toUpperCase() + type.slice(1)
-                                                    ).join(', ') || 'Integers'}</div>
-                                                    <div>➕ {game.settings.mathOperations.map((op: string) =>
-                                                        op.charAt(0).toUpperCase() + op.slice(1)
-                                                    ).join(', ')}</div>
+                                                    {'numberTypes' in game.settings && Array.isArray((game.settings as any).numberTypes) && (
+                                                        <div>🔢 {((game.settings as any).numberTypes).map((type: string) =>
+                                                            type.charAt(0).toUpperCase() + type.slice(1)
+                                                        ).join(', ')}</div>
+                                                    )}
+                                                    {'mathOperations' in game.settings && Array.isArray((game.settings as any).mathOperations) && (
+                                                        <div>➕ {((game.settings as any).mathOperations).map((op: string) =>
+                                                            op.charAt(0).toUpperCase() + op.slice(1)
+                                                        ).join(', ')}</div>
+                                                    )}
                                                 </div>
                                             </td>
                                             <td className="px-4 py-4 text-sm text-gray-900 dark:text-white">

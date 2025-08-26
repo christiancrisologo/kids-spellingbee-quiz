@@ -1,4 +1,5 @@
 import type { Difficulty, QuestionType, } from '../store/quiz-store';
+import settings from '../configs/settings.json';
 
 export type YearLevel = 'primary' | 'junior-high' | 'senior-high';
 
@@ -8,7 +9,7 @@ export interface YearLevelPreset {
   numberOfQuestions: number;
   timerPerQuestion: number;
   questionType: QuestionType[];
-  categories: String[];
+  categories: string[];
   description: string;
   // Enhanced settings
   timerEnabled: boolean;
@@ -24,78 +25,44 @@ export interface YearLevelPreset {
   overallTimerDuration: number;
 }
 
-export const yearLevelPresets: Record<YearLevel, YearLevelPreset> = {
-  'primary': {
-    label: '🎒 Primary School',
-    difficulty: 'easy',
-    numberOfQuestions: 5,
-    timerPerQuestion: 12,
-    questionType: ['multiple-choice'],
-    categories: ['countries','animals','actions'],
-    description: 'Basic math for young learners',
-    // Enhanced settings - simple for primary
-    timerEnabled: true,
-    questionsEnabled: true,
-    minCorrectAnswers: 0,
-    maxCorrectAnswers: 5,
-    correctAnswersEnabled: false,
-    minIncorrectAnswers: 0,
-    maxIncorrectAnswers: 3,
-    incorrectAnswersEnabled: false,
-    // Overall timer settings - disabled for primary
-    overallTimerEnabled: false,
-    overallTimerDuration: 180, // 3 minutes
-  },
-  'junior-high': {
-    label: '📚 Junior High School',
-    difficulty: 'easy',
-    numberOfQuestions: 10,
-    timerPerQuestion: 10,
-    questionType: ['input', 'multiple-choice'],
-    categories: ['countries','animals','actions'],
-    description: 'Intermediate spelling bee concepts',
-    // Enhanced settings - moderate challenge
-    timerEnabled: true,
-    questionsEnabled: true,
-    minCorrectAnswers: 0,
-    maxCorrectAnswers: 10,
-    correctAnswersEnabled: false,
-    minIncorrectAnswers: 0,
-    maxIncorrectAnswers: 5,
-    incorrectAnswersEnabled: false,
-    // Overall timer settings - optional for junior high
-    overallTimerEnabled: false,
-    overallTimerDuration: 600, // 10 minutes
-  },
-  'senior-high': {
-    label: '🎓 Senior High School',
-    difficulty: 'hard',
-    numberOfQuestions: 15,
-    timerPerQuestion: 8,
-    questionType: ['input', 'multiple-choice'],
-    categories: ['countries','animals','actions'],
-    description: 'Advanced math challenges',
-    // Enhanced settings - challenging
-    timerEnabled: true,
-    questionsEnabled: true,
-    minCorrectAnswers: 0,
-    maxCorrectAnswers: 15,
-    correctAnswersEnabled: false,
-    minIncorrectAnswers: 0,
-    maxIncorrectAnswers: 8,
-    incorrectAnswersEnabled: false,
-    // Overall timer settings - enabled for senior high
-    overallTimerEnabled: true,
-    overallTimerDuration: 900, // 15 minutes
+// Dynamically build yearLevelPresets from settings.json
+function buildYearLevelPresets() {
+  const presets: { [key: string]: YearLevelPreset } = {};
+  if (settings.yearLevel) {
+    settings.yearLevel.forEach((preset: any) => {
+      presets[preset.name] = {
+        label: preset.label,
+        difficulty: preset.difficulty,
+        numberOfQuestions: preset.numberOfQuestions,
+        timerPerQuestion: preset.timerPerQuestion,
+        questionType: preset.questionType,
+        categories: preset.categories,
+        description: preset.description,
+        timerEnabled: preset.timerEnabled,
+        questionsEnabled: preset.questionsEnabled,
+        minCorrectAnswers: preset.minCorrectAnswers,
+        maxCorrectAnswers: preset.maxCorrectAnswers,
+        correctAnswersEnabled: preset.correctAnswersEnabled,
+        minIncorrectAnswers: preset.minIncorrectAnswers,
+        maxIncorrectAnswers: preset.maxIncorrectAnswers,
+        incorrectAnswersEnabled: preset.incorrectAnswersEnabled,
+        overallTimerEnabled: preset.overallTimerEnabled,
+        overallTimerDuration: preset.overallTimerDuration,
+      };
+    });
   }
-};
+  return presets;
+}
 
-export const getYearLevelPreset = (yearLevel: YearLevel): YearLevelPreset => {
+export const yearLevelPresets = buildYearLevelPresets();
+
+export const getYearLevelPreset = (yearLevel: string): YearLevelPreset | undefined => {
   return yearLevelPresets[yearLevel];
 };
 
-export const applyYearLevelPreset = (yearLevel: YearLevel) => {
+export const applyYearLevelPreset = (yearLevel: string) => {
   const preset = getYearLevelPreset(yearLevel);
+  if (!preset) return undefined;
   return {
     difficulty: preset.difficulty,
     numberOfQuestions: preset.numberOfQuestions,

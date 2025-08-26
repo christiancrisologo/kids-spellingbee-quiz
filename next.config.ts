@@ -1,6 +1,6 @@
 import type { NextConfig } from "next";
 
-const repoName = "kids-spellingbee";
+const repoName = "kids-spellingbee-quiz";
 const isProduction = ['production', 'github-pages'].includes(process.env.NODE_ENV);
 
 

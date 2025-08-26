@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -26,23 +25,12 @@ export default function Home() {
   const { settings: systemSettings } = useSystemSettings();
   const [hasExistingUser, setHasExistingUser] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
+  // Use year level preset for initial form data
+  const defaultYearLevel = 'primary';
+  const presetSettings = applyYearLevelPreset(defaultYearLevel) || {};
   const [formData, setFormData] = useState({
-    username: '',
-    difficulty: 'easy' as Difficulty,
-    numberOfQuestions: 5,
-    timerPerQuestion: 10,
-    questionType: 'input' as QuestionType,
-    categories: ['all'] as Category[],
-    timerEnabled: true,
-    questionsEnabled: true,
-    minCorrectAnswers: 0,
-    maxCorrectAnswers: 5,
-    correctAnswersEnabled: false,
-    minIncorrectAnswers: 0,
-    maxIncorrectAnswers: 5,
-    incorrectAnswersEnabled: false,
-    overallTimerEnabled: false,
-    overallTimerDuration: 180,
+    ...initialFormData,
+    ...presetSettings,
     challengeMode: undefined as string | undefined,
   });
   const [selectedYearLevel, setSelectedYearLevel] = useState<YearLevel | ''>('primary');
@@ -80,7 +68,9 @@ export default function Home() {
     if (typeof window !== 'undefined') {
       localStorage.clear();
     }
-    setFormData({ ...initialFormData, challengeMode: undefined });
+    // Apply year level preset to initialFormData
+    const presetSettings = applyYearLevelPreset('primary');
+    setFormData({ ...initialFormData, ...presetSettings, challengeMode: undefined });
     setSelectedYearLevel('primary');
     setSelectedChallengeMode('');
     setErrors({});
@@ -100,7 +90,7 @@ export default function Home() {
   // Removed unused welcomeBack state
   // Sync form data with loaded settings from store, or apply defaults if no saved data
   useEffect(() => {
-    // If username is blank, check localStorage for spellingbee_quiz_user
+    // If username is blank and no user, apply year level preset
     if (!formData.username) {
       const userRaw = typeof window !== 'undefined' ? localStorage.getItem('spellingbee_quiz_user') : null;
       if (userRaw) {
@@ -110,6 +100,12 @@ export default function Home() {
             setFormData(prev => ({ ...prev, username: userObj.userName }));
           }
         } catch { }
+      } else {
+        // No user, apply year level preset
+        const preset = applyYearLevelPreset(selectedYearLevel || defaultYearLevel);
+        if (preset) {
+          setFormData(prev => ({ ...prev, ...preset }));
+        }
       }
     }
   }, [formData.username]);
@@ -171,13 +167,16 @@ export default function Home() {
 
     // Apply the preset settings
     const presetSettings = applyYearLevelPreset(yearLevel);
-    setFormData(prev => ({
-      ...prev,
-      ...presetSettings,
-      // Update max values for correct/incorrect answer sliders based on number of questions
-      maxCorrectAnswers: presetSettings.numberOfQuestions,
-      maxIncorrectAnswers: presetSettings.numberOfQuestions,
-    }));
+    setFormData(prev => {
+      if (!presetSettings) return prev;
+      return {
+        ...prev,
+        ...presetSettings,
+        // Update max values for correct/incorrect answer sliders based on number of questions
+        maxCorrectAnswers: presetSettings.numberOfQuestions,
+        maxIncorrectAnswers: presetSettings.numberOfQuestions,
+      };
+    });
 
     // Clear any validation errors since we're applying valid presets
     setErrors({});
@@ -193,7 +192,7 @@ export default function Home() {
       // No challenge selected, keep current settings
       setFormData(prev => ({
         ...prev,
-        challengeMode: undefined,
+        challengeMode: undefined as string | undefined,
       }));
     } else {
       // Apply challenge mode settings
@@ -201,6 +200,7 @@ export default function Home() {
       setFormData(prev => ({
         ...prev,
         ...updatedSettings,
+        challengeMode: challengeName,
       }));
 
       // Show settings so user can see what was applied
@@ -318,7 +318,7 @@ export default function Home() {
           {/* Header */}
           <div className="text-center mb-6">
             <h1 className={`font-bold text-gray-800 dark:text-gray-200 mb-3 ${isMobile ? 'text-2xl' : 'text-5xl'}`}>
-              Math Quiz for Kids
+              Spelling Bee
             </h1>
           </div>
 
@@ -612,21 +612,20 @@ export default function Home() {
               </div>              {/* Question Type */}
               <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl p-3">
                 <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-2 flex items-center text-sm">
-                  🎯 Question Type
+                  📝 Question Type
                 </h3>
-                <div className={`grid gap-2 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
-                  {([
-                    { value: 'expression', label: '📝 Math Expression', subtitle: 'e.g., 4 + 3 = ?' },
-                    { value: 'multiple-choice', label: '🎯 Multiple Choice', subtitle: '3 options' }
-                  ] as { value: QuestionType; label: string; subtitle: string }[]).map((type) => (
-                    <MobileTile
-                      key={type.value}
-                      title={type.label}
-                      subtitle={type.subtitle}
-                      isSelected={formData.questionType === type.value}
-                      onClick={() => handleInputChange('questionType', type.value)}
-                    />
-                  ))}
+                <div className={`grid gap-2 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>                  {([
+                  { value: 'input', label: '✍️ Type the Word', subtitle: 'Manually type the spelling' },
+                  { value: 'multiple-choice', label: '🎯 Multiple Choice', subtitle: 'Choose the correct spelling' }
+                ] as { value: QuestionType; label: string; subtitle: string }[]).map((type) => (
+                  <MobileTile
+                    key={type.value}
+                    title={type.label}
+                    subtitle={type.subtitle}
+                    isSelected={formData.questionType === type.value}
+                    onClick={() => handleInputChange('questionType', type.value)}
+                  />
+                ))}
                 </div>
                 {selectedYearLevel && (
                   <div className="mt-2 text-xs text-gray-600 dark:text-gray-400">
@@ -636,29 +635,29 @@ export default function Home() {
                   </div>
                 )}
               </div>
-
               {/* Categories Selection */}
               <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl p-3">
                 <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-2 flex items-center text-sm">
-                  �️ Categories (Select Multiple)
+                  🏷️ Word Categories (Select Multiple)
                 </h3>
-                <div className={`grid gap-2 ${isMobile ? 'grid-cols-1' : 'grid-cols-3'}`}>
-                  {([
-                    { value: 'countries', label: '🌍 Countries', subtitle: 'Geography questions' },
-                    { value: 'animals', label: '� Animals', subtitle: 'Animal questions' },
-                    { value: 'persons', label: '� Persons', subtitle: 'Famous people' },
-                    { value: 'science', label: '� Science', subtitle: 'Science questions' },
-                    { value: 'actions', label: '🏃 Actions', subtitle: 'Action verbs' },
-                    { value: 'all', label: '✨ All', subtitle: 'All categories' }
-                  ] as { value: Category; label: string; subtitle: string }[]).map((cat) => (
-                    <MobileTile
-                      key={cat.value}
-                      title={cat.label}
-                      subtitle={cat.subtitle}
-                      isSelected={formData.categories.includes(cat.value)}
-                      onClick={() => handleCategoryToggle(cat.value)}
-                    />
-                  ))}
+                <div className={`grid gap-2 ${isMobile ? 'grid-cols-1' : 'grid-cols-3'}`}>                  {([
+                  { value: 'places', label: '🌍 Places', subtitle: 'Geography words' },
+                  { value: 'animals', label: '🐾 Animals', subtitle: 'Animal words' },
+                  { value: 'persons', label: '🧑 Persons', subtitle: 'Famous people' },
+                  { value: 'science', label: '🔬 Science', subtitle: 'Science words' },
+                  { value: 'technology', label: '💻 Technology', subtitle: 'Tech words' },
+                  { value: 'actions', label: '🏃 Actions', subtitle: 'Action verbs' },
+                  { value: 'other', label: '✨ Other', subtitle: 'Other words' },
+                  { value: 'all', label: '🌟 All', subtitle: 'All categories' }
+                ] as { value: Category; label: string; subtitle: string }[]).map((cat) => (
+                  <MobileTile
+                    key={cat.value}
+                    title={cat.label}
+                    subtitle={cat.subtitle}
+                    isSelected={formData.categories.includes(cat.value)}
+                    onClick={() => handleCategoryToggle(cat.value)}
+                  />
+                ))}
                 </div>
                 {formData.categories.length > 0 && (
                   <div className="mt-2 text-xs text-gray-600 dark:text-gray-400">

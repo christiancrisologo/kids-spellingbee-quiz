@@ -27,7 +27,7 @@ export const encouragingMessages = {
     "You're on fire! 🔥",
     "Streak master! ⚡",
     "Unstoppable! 🚀",
-    Spelling Bee wizard! 🧙‍♂️",
+    "Spelling Bee wizard! 🧙‍♂️",
     "Champion! 🏆",
     "Phenomenal! 🌟",
     "Mind-blowing! 🤯",
