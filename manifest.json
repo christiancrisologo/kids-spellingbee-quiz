@@ -1,0 +1,16 @@
+{
+  "name": "Kids Spelling Bee Quiz",
+  "short_name": "spellingbee",
+  "description": "A fun and educational Seplling Bee App for kids.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#8b5cf6",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48 64x64 128x128 256x256 512x512",
+      "type": "image/x-icon"
+    }
+  ]
+}
