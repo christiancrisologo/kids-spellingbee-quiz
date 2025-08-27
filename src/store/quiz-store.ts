@@ -183,8 +183,29 @@ export const useQuizStore = create<QuizState>((set, get) => ({
     });
   },
   submitAnswer: (answer: string) => {
-    set(() => {
-      return {};
+    set((state) => {
+      const currentIdx = state.currentQuestionIndex;
+      const questions = [...state.questions];
+      const currentQuestion = questions[currentIdx];
+      let isCorrect = false;
+      if (currentQuestion) {
+        // For input type, compare string; for multiple-choice, compare index
+        if (state.settings.questionType === 'input') {
+          isCorrect = typeof answer === 'string' && answer.trim().toLowerCase() === currentQuestion.answer.trim().toLowerCase();
+          currentQuestion.userAnswer = answer;
+        } else if (state.settings.questionType === 'multiple-choice' && currentQuestion.options) {
+          const idx = typeof answer === 'number' ? answer : parseInt(answer as string);
+          isCorrect = currentQuestion.options[idx] === currentQuestion.answer;
+          currentQuestion.userAnswer = currentQuestion.options[idx];
+        }
+        currentQuestion.isCorrect = isCorrect;
+        questions[currentIdx] = currentQuestion;
+      }
+      return {
+        questions,
+        correctAnswersCount: isCorrect ? state.correctAnswersCount + 1 : state.correctAnswersCount,
+        incorrectAnswersCount: !isCorrect ? state.incorrectAnswersCount + 1 : state.incorrectAnswersCount,
+      };
     });
   },
   setTimeRemaining: (time: number) => {

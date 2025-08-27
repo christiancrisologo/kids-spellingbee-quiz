@@ -29,13 +29,32 @@ export interface YearLevelPreset {
 function buildYearLevelPresets() {
   const presets: { [key: string]: YearLevelPreset } = {};
   if (settings.yearLevel) {
-    settings.yearLevel.forEach((preset: any) => {
+    settings.yearLevel.forEach((preset: {
+      name: string;
+      label: string;
+      difficulty: string;
+      numberOfQuestions: number;
+      timerPerQuestion: number;
+      questionType: string[];
+      categories: string[];
+      description: string;
+      timerEnabled: boolean;
+      questionsEnabled: boolean;
+      minCorrectAnswers: number;
+      maxCorrectAnswers: number;
+      correctAnswersEnabled: boolean;
+      minIncorrectAnswers: number;
+      maxIncorrectAnswers: number;
+      incorrectAnswersEnabled: boolean;
+      overallTimerEnabled: boolean;
+      overallTimerDuration: number;
+    }) => {
       presets[preset.name] = {
         label: preset.label,
-        difficulty: preset.difficulty,
+        difficulty: preset.difficulty as Difficulty,
         numberOfQuestions: preset.numberOfQuestions,
         timerPerQuestion: preset.timerPerQuestion,
-        questionType: preset.questionType,
+        questionType: preset.questionType as QuestionType[],
         categories: preset.categories,
         description: preset.description,
         timerEnabled: preset.timerEnabled,

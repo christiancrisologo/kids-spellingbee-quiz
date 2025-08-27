@@ -61,7 +61,7 @@ export default function Home() {
       }
       setShowWelcome(show);
     }
-  }, [formData.username]);
+  }, [formData.username, selectedYearLevel]);
 
   // Handler for new user button
   const handleNewUser = () => {
@@ -108,7 +108,7 @@ export default function Home() {
         }
       }
     }
-  }, [formData.username]);
+  }, [formData.username, selectedYearLevel]);
 
   const handleInputChange = (field: string, value: string | number | boolean) => {
     setFormData(prev => {

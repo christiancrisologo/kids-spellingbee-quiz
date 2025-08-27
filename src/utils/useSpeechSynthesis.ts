@@ -15,7 +15,7 @@ export type SpeechSynthOptionsType = {
 type Voice = {
     name: string | undefined
 }
-function getRandomItem(items: any[]) {
+function getRandomItem<T>(items: T[]): T {
   const randomIndex = Math.floor(Math.random() * items.length);
   return items[randomIndex];
   }
@@ -31,7 +31,7 @@ export const useSpeechSynthesis = (): SpeechSynthType => {
         console.warn('SpeechSynthesis not ready!');
         return;
       }
-      const voices = speechSynth.getVoices();
+  const voices: SpeechSynthesisVoice[] = speechSynth.getVoices();
       const activeVoices = voices.filter(
         (voice: SpeechSynthesisVoice) => voice.lang === 'en-AU' || voice.lang === 'en-GB'
       );

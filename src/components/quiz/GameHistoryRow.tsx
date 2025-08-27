@@ -22,8 +22,7 @@ const GameHistoryRow: React.FC<GameHistoryRowProps> = ({ game, formatDate, forma
         <td className="px-4 py-4 text-sm text-gray-900 dark:text-white">
             <div className="space-y-1">
                 <div>📝 {game.settings.questionType?.charAt(0).toUpperCase() + game.settings.questionType?.slice(1) || 'Multiple Choice'}</div>
-                <div>🔢 {game.settings.numberTypes?.map((type: string) => type.charAt(0).toUpperCase() + type.slice(1)).join(', ') || 'Integers'}</div>
-                <div>➕ {game.settings.mathOperations.map((op: string) => op.charAt(0).toUpperCase() + op.slice(1)).join(', ')}</div>
+                <div>🔢 {game.settings.categories?.map((type: string) => type.charAt(0).toUpperCase() + type.slice(1)).join(', ') || 'Integers'}</div>
             </div>
         </td>
         <td className="px-4 py-4 text-sm text-gray-900 dark:text-white">
