@@ -1,3 +1,19 @@
+/* Flash background for correct/incorrect answer */
+.flash-correct {
+  animation: flashGreenBg 0.6s;
+}
+.flash-incorrect {
+  animation: flashRedBg 0.6s;
+}
+
+@keyframes flashGreenBg {
+  0% { background: #38e38a; }
+  100% { background: var(--color-background, var(--background)); }
+}
+@keyframes flashRedBg {
+  0% { background: #ff6b6b; }
+  100% { background: var(--color-background, var(--background)); }
+}
 @import "tailwindcss";
 
 /* Legacy CSS variables for backward compatibility */

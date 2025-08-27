@@ -22,7 +22,7 @@ export const generateQuestions = (
 
   // Filter words
   const filteredWords = (data as unknown as Array<{
-      definition: any;
+    definition: string;
       synonyms: never[];
       antonyms: never[]; category: string; difficulty: string; word: string 
 }> ).filter(wordObj =>

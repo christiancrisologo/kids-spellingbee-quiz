@@ -40,8 +40,6 @@ export default function QuizPage() {
     const [selectedOption, setSelectedOption] = useState<number | null>(null);
     const [showHint, setShowHint] = useState(false);
     const [hintContent, setHintContent] = useState<string>('');
-    const [hasSpoken, setHasSpoken] = useState(false);
-    // Countdown state (move to top-level)
     const [showCountdown, setShowCountdown] = useState(true);
     const countdownWords = ['Get', 'Ready', 'Go!'];
     const [countdownIdx, setCountdownIdx] = useState(0);
@@ -50,11 +48,7 @@ export default function QuizPage() {
     const inputRef = useRef<HTMLInputElement>(null);
 
     // Question transition animations
-    const {
-        transitionClasses,
-        isUserInteractionBlocked,
-        animationKey,
-    } = useQuestionTransition(currentQuestionIndex, systemSettings.animations);
+    const { isUserInteractionBlocked } = useQuestionTransition(currentQuestionIndex, systemSettings.animations);
 
     const currentQuestion = questions[currentQuestionIndex];
     // Start quiz when component mounts
@@ -68,7 +62,6 @@ export default function QuizPage() {
     useEffect(() => {
         setShowCountdown(true);
         setCountdownIdx(0);
-        setHasSpoken(false);
         if (isQuizActive && currentQuestion) {
             const interval = setInterval(() => {
                 setCountdownIdx(prev => {
@@ -77,7 +70,6 @@ export default function QuizPage() {
                         setShowCountdown(false);
                         // Speak the word once after countdown
                         speak(currentQuestion.question, {});
-                        setHasSpoken(true);
                         return prev;
                     }
                     return prev + 1;
@@ -85,13 +77,19 @@ export default function QuizPage() {
             }, 700);
             return () => clearInterval(interval);
         }
-    }, [currentQuestionIndex, isQuizActive, currentQuestion, speak]);
+    }, [currentQuestionIndex, isQuizActive, currentQuestion, speak, countdownWords.length]);
 
     // Clear all inputs and selections when question changes
     useEffect(() => {
         setUserInput('');
         setSelectedOption(null);
+        setShowHint(false);
+        setHintContent('');
+        setShowDefinition(false);
+        setFlashResult(null);
     }, [currentQuestionIndex]);
+    // Flash result state
+    const [flashResult, setFlashResult] = useState<null | 'correct' | 'incorrect'>(null);
 
     // Timer logic - pause during countdown and animations, and check if timer is enabled
     useEffect(() => {
@@ -219,8 +217,11 @@ export default function QuizPage() {
     };
 
     // Define word
+    const [showDefinition, setShowDefinition] = useState(false);
     const handleDefine = () => {
-        if (currentQuestion && typeof currentQuestion.definition === 'string') speak(currentQuestion.definition, { rate: 1.2 });
+        if (currentQuestion && typeof currentQuestion.definition === 'string') {
+            setShowDefinition(true);
+        }
     };
 
     const handleTimeUp = () => {
@@ -242,8 +243,12 @@ export default function QuizPage() {
     const handleSubmitAnswer = () => {
         let isCorrect = false;
 
-        /** Handles the spelling bee */
-        const answer = '';
+        let answer: string = '';
+        if (settings.questionType === 'input') {
+            answer = userInput;
+        } else if (settings.questionType === 'multiple-choice') {
+            answer = selectedOption !== null ? String(selectedOption) : '';
+        }
 
         submitAnswer(answer);
 
@@ -258,10 +263,14 @@ export default function QuizPage() {
                 if (isCorrect) {
                     playSound('correct', systemSettings);
                     vibrate([100, 50, 100], systemSettings);
+                    setFlashResult('correct');
                 } else {
                     playSound('incorrect', systemSettings);
                     vibrate(200, systemSettings);
+                    setFlashResult('incorrect');
                 }
+                // Remove flash after 600ms
+                setTimeout(() => setFlashResult(null), 600);
             }, 100);
         }
 
@@ -273,7 +282,7 @@ export default function QuizPage() {
             setTimeout(() => {
                 playSound('completion', systemSettings);
                 completeQuiz();
-            }, 1500);
+            }, 1000);
         } else {
             setTimeout(() => {
                 nextQuestion();
@@ -283,7 +292,7 @@ export default function QuizPage() {
                         if (inputRef.current) inputRef.current.focus();
                     }
                 }, 100);
-            }, 1500);
+            }, 1000);
         }
     };
 
@@ -330,7 +339,7 @@ export default function QuizPage() {
     />);
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-orange-400 via-pink-500 to-blue-500 dark:from-violet-900 dark:via-purple-800 dark:to-indigo-900">
+        <div className={`min-h-screen bg-gradient-to-br from-orange-400 via-pink-500 to-blue-500 dark:from-violet-900 dark:via-purple-800 dark:to-indigo-900 ${flashResult === 'correct' ? 'flash-correct' : ''} ${flashResult === 'incorrect' ? 'flash-incorrect' : ''}`}>
             {/* Header: mobile and desktop differ, rest is unified */}
             {isMobile && (<div className="bg-white dark:bg-slate-800 shadow-lg p-4 sticky top-0 z-10">{headerContent}</div>)}
             {/* Unified Content for both mobile and desktop */}
@@ -353,10 +362,17 @@ export default function QuizPage() {
                                     <button onClick={handleRepeat} className="px-4 py-2 rounded bg-blue-200 dark:bg-blue-700 text-blue-900 dark:text-blue-100 font-bold">🔊 Speak</button>
                                     <button onClick={handleDefine} className="px-4 py-2 rounded bg-green-200 dark:bg-green-700 text-green-900 dark:text-green-100 font-bold">📖 Define</button>
                                     <button onClick={handleHint} className="px-4 py-2 rounded bg-yellow-200 dark:bg-yellow-700 text-yellow-900 dark:text-yellow-100 font-bold">💡 Hint</button>
+
                                 </div>
+                                {showDefinition && currentQuestion?.definition && (
+                                    <div className="mt-2 p-3 bg-green-50 dark:bg-green-900/20 rounded text-green-900 dark:text-green-100 text-sm">
+                                        <strong>Definition:</strong> {currentQuestion.definition}
+                                    </div>
+                                )}
                                 {showHint && (
                                     <div className="mt-2 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded text-yellow-900 dark:text-yellow-100 text-sm">{hintContent}</div>
                                 )}
+                                {/* Definition only shows at the bottom, not on the right side */}
                             </div>
                             {/* Answer Input */}
                             <div className={`mb-8 ${getBlockingOverlayClasses(isUserInteractionBlocked)}`}>
