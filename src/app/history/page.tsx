@@ -10,6 +10,8 @@ import { MobileButton } from '../../components/ui/MobileButton';
 import HistoryHeader from '../../components/quiz/HistoryHeader';
 import NoHistory from '../../components/quiz/NoHistory';
 
+import { defaultSettings } from '../../store/quiz-store';
+
 
 
 export default function HistoryPage() {
@@ -53,19 +55,50 @@ export default function HistoryPage() {
                     .eq('player_id', userId)
                     .eq('game_id', APP.ID);
                 if (error) throw error;
-                const parsedRemote = (remoteRecords || []).map((rec: any) => {
-                    let settings = rec.settings;
+                const parsedRemote = (remoteRecords || []).map((rec: {
+                    id?: string;
+                    player_id?: string;
+                    game_id?: string;
+                    settings?: import('../../store/quiz-store').QuizSettings;
+                    game_settings?: string | import('../../store/quiz-store').QuizSettings;
+                    questions?: Array<{
+                        question?: string;
+                        correctAnswer?: string;
+                        userAnswer?: string;
+                        isCorrect?: boolean;
+                        timeSpent?: number;
+                    }>;
+                    totalQuestions?: number;
+                    correctAnswers?: number;
+                    incorrectAnswers?: number;
+                    score?: number;
+                    completedAt?: string | Date;
+                    created_at?: string;
+                    timeSpent?: number;
+                    quizDuration?: number;
+                    averageTimePerQuestion?: number;
+                }) => {
+                    let settings: import('../../store/quiz-store').QuizSettings = rec.settings as import('../../store/quiz-store').QuizSettings;
                     if (!settings && rec.game_settings) {
                         try {
                             settings = typeof rec.game_settings === 'string'
                                 ? JSON.parse(rec.game_settings)
-                                : rec.game_settings;
+                                : rec.game_settings as import('../../store/quiz-store').QuizSettings;
                         } catch {
-                            settings = {};
+                            settings = defaultSettings;
                         }
                     }
+                    if (!settings) {
+                        settings = defaultSettings;
+                    }
                     const questions = Array.isArray(rec.questions)
-                        ? rec.questions.map((q: any) => ({
+                        ? rec.questions.map((q: {
+                            question?: string;
+                            correctAnswer?: string;
+                            userAnswer?: string;
+                            isCorrect?: boolean;
+                            timeSpent?: number;
+                        }) => ({
                             question: q.question ?? '',
                             correctAnswer: q.correctAnswer ?? '',
                             userAnswer: q.userAnswer ?? '',
@@ -76,10 +109,10 @@ export default function HistoryPage() {
                     // Calculate correct/incorrect answers if not present
                     const correctAnswers = typeof rec.correctAnswers === 'number'
                         ? rec.correctAnswers
-                        : questions.filter((q: any) => q.isCorrect).length;
+                        : questions.filter((q) => q.isCorrect).length;
                     const incorrectAnswers = typeof rec.incorrectAnswers === 'number'
                         ? rec.incorrectAnswers
-                        : questions.filter((q: any) => !q.isCorrect).length;
+                        : questions.filter((q) => !q.isCorrect).length;
                     return {
                         id: rec.id ?? '',
                         userId: rec.player_id ?? '',

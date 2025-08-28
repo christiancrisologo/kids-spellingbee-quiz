@@ -78,7 +78,7 @@ export interface QuizState {
   clearUserData: () => void;
 }
 
-const defaultSettings: QuizSettings = {
+export const defaultSettings: QuizSettings = {
   username: '',
   difficulty: 'easy',
   numberOfQuestions: 10,
